@@ -1,2 +1,2 @@
-setenv.sh
+scripts/setenv.sh
 __pycache__/

@@ -21,7 +21,7 @@ application = Flask(__name__)
 
 orders = []
 
-def createOrder(oid):
+def getOrderById(oid):
     print('Create order')
     data = {"orderID": oid, 
         "productID": "FreshFoodItg", 
@@ -43,14 +43,14 @@ def hello():
 
 @application.route("/order", methods = ['GET'])
 def getOrder():
-    order= createOrder("10")
+    order= getOrderById("10")
     return jsonify(order)
     
 @application.route("/order", methods = ['POST'])
 def createOrder():
-    if not request.json or not 'orderID' in request.json:
-        abort(400)
     print(request.json)
+    if not request.json or not 'orderID' in request.json:
+        return 
     order = request.json
     d = datetime.datetime(2019, 4, 13,10,0,14)
     evt = {"orderID": orderID,"timestamp": int(datetime.datetime.timestamp(d)),"type":"OrderCreated","payload": order}
