@@ -54,6 +54,13 @@ To deploy the code to an openshift cluster do the following:
     oc set env dc/order-producer-python KAFKA_APIKEY=""
     ```
 
+    For the kafka runtime env: 
+
+    ```
+     oc set env dc/order-producer-python KAFKA_ENV="IBM_CLOUD"
+    ```
+
+    Get all environment variables:
 
 ## Build and run locally
 
