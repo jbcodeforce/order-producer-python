@@ -1,5 +1,5 @@
-from flask import Flask, request
-import os, time, jsonify
+from flask import Flask, request, jsonify, abort
+import os, time, datetime
 from KcProducer import KafkaProducer 
 
 try:
@@ -22,7 +22,7 @@ application = Flask(__name__)
 orders = []
 
 def getOrderById(oid):
-    print('Create order')
+    print('getOrderById ')
     data = {"orderID": oid, 
         "productID": "FreshFoodItg", 
         "customerID": "Customer000",
@@ -31,8 +31,7 @@ def getOrderById(oid):
         "destinationAddress": {"street": "bstreet","city": "Beijing","country":"China","state":"NE","zipcode": "09000"},
         "pickupDate": "2019-05-25",
         "expectedDeliveryDate": "2019-06-25"}
-    containerEvent = {"orderID": oid,"timestamp": int(time.time()),"type":"OrderCreated","payload": data}
-    return containerEvent
+    return data
 
 
 
@@ -49,11 +48,11 @@ def getOrder():
 @application.route("/order", methods = ['POST'])
 def createOrder():
     print(request.json)
-    if not request.json or not 'orderID' in request.json:
-        return 
+    if not 'orderID' in request.json:
+        abort(400) 
     order = request.json
     d = datetime.datetime(2019, 4, 13,10,0,14)
-    evt = {"orderID": orderID,"timestamp": int(datetime.datetime.timestamp(d)),"type":"OrderCreated","payload": order}
+    evt = {"orderID": order["orderID"],"timestamp": int(datetime.datetime.timestamp(d)),"type":"OrderCreated","payload": order}
     kp = KafkaProducer(KAFKA_ENV,KAFKA_BROKERS,KAFKA_APIKEY)
     kp.prepareProducer("OrderProducerPython")
     kp.publishEvent('orders',evt,"orderID")

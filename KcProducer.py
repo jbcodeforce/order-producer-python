@@ -14,8 +14,9 @@ class KafkaProducer:
                 'group.id': groupID
         }
         if (self.kafka_env != 'LOCAL'):
-            options['security.protocol'] = 'SASL_SSL'
+            options['security.protocol'] = 'sasl_ssl'
             options['sasl.mechanisms'] = 'PLAIN'
+            options['ssl.ca.location'] = '/etc/pki/tls/cert.pem'
             options['sasl.username'] = 'token'
             options['sasl.password'] = self.kafka_apikey
         print(options)
