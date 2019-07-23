@@ -30,6 +30,17 @@ To deploy the code to an openshift cluster do the following:
     ```
     The dependencies are loaded, the build is scheduled and executed, the image is uploaded to the registry, and started.
 
+1. To display information about the build configuration for the application:
+
+    ```
+    oc describe bc/order-producer-python
+    ```
+
+    You can see details of the Git repository being used as the source for any build, and a Webhook URL that can be configured into a Git hosting service to trigger a new build automatically when changes are committed and pushed up to a Git repository. 
+
+    For all webhooks, you must define a Secret with a key named WebHookSecretKey and the value being the value to be supplied when invoking the webhook. The webhook definition must then reference the secret. The secret ensures the uniqueness of the URL, preventing others from triggering the build. The value of the key will be compared to the secret provided during the webhook invocation. See [this note](https://docs.openshift.com/container-platform/3.9/dev_guide/builds/triggering_builds.html) for detail. 
+
+1. to trigger a build from local source code
 
 1. Set environment variables
 

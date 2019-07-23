@@ -53,7 +53,7 @@ def createOrder():
     print(request.json)
     order = request.json
     d = datetime.datetime(2019, 4, 13,10,0,14)
-    evt = {"orderID": orderID.,"timestamp": int(datetime.datetime.timestamp(d)),"type":"OrderCreated","payload": order}
+    evt = {"orderID": orderID,"timestamp": int(datetime.datetime.timestamp(d)),"type":"OrderCreated","payload": order}
     kp = KafkaProducer(KAFKA_ENV,KAFKA_BROKERS,KAFKA_APIKEY)
     kp.prepareProducer("OrderProducerPython")
     kp.publishEvent('orders',evt,"orderID")

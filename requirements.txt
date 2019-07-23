@@ -2,3 +2,4 @@ gunicorn
 Flask
 request
 jsonify
+confluent_kafka
