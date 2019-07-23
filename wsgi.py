@@ -1,17 +1,29 @@
-from flask import Flask
-import os
+from flask import Flask, request
+import os, time, jsonify
+from KcProducer import KafkaProducer 
 
 try:
     KAFKA_BROKERS = os.environ['KAFKA_BROKERS']
 except KeyError:
-    # KAFKA_BROKERS = "kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093,kafka05-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093"
     KAFKA_BROKERS = "localhost:9092"
+
+try:
+    KAFKA_APIKEY = os.environ['KAFKA_APIKEY']
+except KeyError:
+    print("The KAFKA_APIKEY environment variable not set... assume local deployment")
+
+try:
+    KAFKA_ENV = os.environ['KAFKA_ENV']
+except KeyError:
+    KAFKA_ENV='LOCAL'
 
 application = Flask(__name__)
 
-def createOrder(id):
+orders = []
+
+def createOrder(oid):
     print('Create order')
-    data = {"orderID": id, 
+    data = {"orderID": oid, 
         "productID": "FreshFoodItg", 
         "customerID": "Customer000",
         "quantity": 180, 
@@ -19,8 +31,9 @@ def createOrder(id):
         "destinationAddress": {"street": "bstreet","city": "Beijing","country":"China","state":"NE","zipcode": "09000"},
         "pickupDate": "2019-05-25",
         "expectedDeliveryDate": "2019-06-25"}
-    containerEvent = {"orderID": id,"timestamp": int(time.time()),"type":"OrderCreated","payload": data}
+    containerEvent = {"orderID": oid,"timestamp": int(time.time()),"type":"OrderCreated","payload": data}
     return containerEvent
+
 
 
 @application.route("/")
@@ -28,10 +41,24 @@ def hello():
     print(KAFKA_BROKERS)
     return "Jbcodeforce on Openshift Hello to you! v01"
 
-@application.route("/order")
+@application.route("/order", methods = ['GET'])
 def getOrder():
-    return createOrder("10")
+    order= createOrder("10")
+    return jsonify(order)
+    
+@application.route("/order", methods = ['POST'])
+def createOrder():
+    if not request.json or not 'orderID' in request.json:
+        abort(400)
+    print(request.json)
+    order = request.json
+    d = datetime.datetime(2019, 4, 13,10,0,14)
+    evt = {"orderID": orderID.,"timestamp": int(datetime.datetime.timestamp(d)),"type":"OrderCreated","payload": order}
+    kp = KafkaProducer(KAFKA_ENV,KAFKA_BROKERS,KAFKA_APIKEY)
+    kp.prepareProducer("OrderProducerPython")
+    kp.publishEvent('orders',evt,"orderID")
+    return jsonify(evt)
 
 if __name__ == "__main__":
-    application.run()
+    application.run(debug=True)
     
