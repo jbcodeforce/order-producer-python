@@ -8,7 +8,11 @@ The high level view of the solution may look like the figure below:
 
 ![](docs/order-producer-python.png)
 
-The application exposes two APIs:
+1. The application this repository is doing. This readme explains how to deploy it on Openshift.
+1. The order consumer runs locally on the developer machine, and is here to validate tests
+1. The Kafka deployment is IBM Cloud Event Stream service.
+
+The application (1) exposes two APIs:
 
 * GET /order to get an order by id
 * POST /order to create an order
@@ -16,6 +20,8 @@ The application exposes two APIs:
 There is no persistence, only a key-value map in memory.
 
 When the order creation command is performed, an event is published to the kafka broker on the `orders` topic. The KcProducer.py defines a class to produce message. It uses different options depending of the type of deployment used for Kafka (Local or On Cloud). 
+
+## Build and run on OpentShift
 
 To deploy the code to an openshift cluster do the following:
 
@@ -55,9 +61,9 @@ To deploy the code to an openshift cluster do the following:
 
 1. To trigger a build from local source code
 
-  ```
-  oc start-build order-producer-python --from-file=.
-  ```
+    ```
+    oc start-build order-producer-python --from-file=.
+    ```
 
 1. Set environment variables
 
@@ -83,7 +89,7 @@ To deploy the code to an openshift cluster do the following:
     oc set env pod/order-producer-python-4-tq27j --list
     ```
 
-Running the scripts/setenv.sh will set those environment variables. 
+Running the scripts/setenv.sh will set those environment variables. (Set the environment variable for the kafka broker end points, and the API key in the setenv-tmpl.sh and rename the scripts as setenv.sh )
 
 ## Run integration test
 
