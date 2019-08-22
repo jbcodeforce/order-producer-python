@@ -36,7 +36,7 @@ options = {
     'bootstrap.servers': KAFKA_BROKERS,
     'group.id': 'python-orders-consumer',
     'auto.offset.reset': 'earliest',
-    'enable.auto.commit': True
+    'enable.auto.commit': False
     }
 
 if (KAFKA_ENV != 'LOCAL'):

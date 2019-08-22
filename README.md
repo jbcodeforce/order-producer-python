@@ -1,23 +1,25 @@
-# Kafka producer with flask
+# Kafka order producer with Python and Flask
 
-This is a simple example of using kafka producer in python within a flask application to expose a POST operation for creating order and publish "order created" events. The events are sent to the kafka topic `orders` created in IBM Event Stream service on IBM Cloud.
+This is a simple python Flask web app example to expose REST end points and to produce event to kafka. It exposes a POST operation for creating a shipment order and publishes an "order created" event to kafka. The events are sent to the kafka topic `orders` created in IBM Event Stream service on IBM Cloud.
 
-This sample is used to validate an Event Stream deployment, with this code running in an Openshift cluster.
+This sample is used to validate an IBM Cloud Event Stream deployment, with this code running in an Openshift cluster using a source to image deployment model.
 
 The high level view of the solution may look like the figure below:
 
 ![](docs/order-producer-python.png)
 
-The application is a Flask app, exposing two APIs:
+The application exposes two APIs:
 
 * GET /order to get an order by id
 * POST /order to create an order
 
-At the order creation an event is published to the kafka broker..
+There is no persistence, only a key-value map in memory.
+
+When the order creation command is performed, an event is published to the kafka broker on the `orders` topic. The KcProducer.py defines a class to produce message. It uses different options depending of the type of deployment used for Kafka (Local or On Cloud). 
 
 To deploy the code to an openshift cluster do the following:
 
-1. Login to the cluster. 
+1. Login to the openshift cluster. 
 
     ```
     oc login -u apikey -p <apikey> --server=https://...
@@ -51,9 +53,10 @@ To deploy the code to an openshift cluster do the following:
 
     For all webhooks, you must define a Secret with a key named WebHookSecretKey and the value being the value to be supplied when invoking the webhook. The webhook definition must then reference the secret. The secret ensures the uniqueness of the URL, preventing others from triggering the build. The value of the key will be compared to the secret provided during the webhook invocation. See [this note](https://docs.openshift.com/container-platform/3.9/dev_guide/builds/triggering_builds.html) for detail. 
 
-1. to trigger a build from local source code
+1. To trigger a build from local source code
 
   ```
+  oc start-build order-producer-python --from-file=.
   ```
 
 1. Set environment variables
@@ -74,12 +77,15 @@ To deploy the code to an openshift cluster do the following:
      oc set env dc/order-producer-python KAFKA_ENV="IBM_CLOUD"
     ```
 
-    Get all environment variables:
+    Get all environment variables set for a given pod: (det the pod id with `oc get pod`)
 
     ```
+    oc set env pod/order-producer-python-4-tq27j --list
     ```
 
-## Run test
+Running the scripts/setenv.sh will set those environment variables. 
+
+## Run integration test
 
 Once the application is deployed, we can see the log using the pod name:
 
@@ -91,7 +97,8 @@ kubectl logs <podename>
 Then the script to create an order:
 
 ```
-./scripts/createOrder.sh
+./scripts/createOrder.sh <hostname> <orderid>
+./scripts/createOrder.sh orderwebaproute-reefershipmentsolution.apps.green-with-envy.ocp.csplab.local o01
 ```
 
 You should see something like:
@@ -146,7 +153,7 @@ The configuration for kafka is based on [librdkafka library](https://github.com/
 
 The producer configuration looks like:
 
-```json
+```
 options ={
             'bootstrap.servers':  self.kafka_brokers,
             'group.id': groupID,

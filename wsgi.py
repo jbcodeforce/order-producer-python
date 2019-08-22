@@ -20,6 +20,8 @@ except KeyError:
 application = Flask(__name__)
 
 orders = []
+kp = KafkaProducer(KAFKA_ENV,KAFKA_BROKERS,KAFKA_APIKEY)
+kp.prepareProducer("OrderProducerPython")
 
 def getOrderById(oid):
     print('getOrderById ')
@@ -40,9 +42,9 @@ def hello():
     print(KAFKA_BROKERS)
     return "Jbcodeforce on Openshift Hello to you! v01"
 
-@application.route("/order", methods = ['GET'])
-def getOrder():
-    order= getOrderById("10")
+@application.route("/order/<orderid>", methods = ['GET'])
+def getOrder(orderid):
+    order= getOrderById(orderid)
     return jsonify(order)
     
 @application.route("/order", methods = ['POST'])
@@ -53,8 +55,6 @@ def createOrder():
     order = request.json
     d = datetime.datetime(2019, 4, 13,10,0,14)
     evt = {"orderID": order["orderID"],"timestamp": int(datetime.datetime.timestamp(d)),"type":"OrderCreated","payload": order}
-    kp = KafkaProducer(KAFKA_ENV,KAFKA_BROKERS,KAFKA_APIKEY)
-    kp.prepareProducer("OrderProducerPython")
     kp.publishEvent('orders',evt,"orderID")
     return jsonify(evt)
 
