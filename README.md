@@ -174,13 +174,13 @@ options ={
 
 ## Build and run locally
 
-To build with s2i CLI:
+To build the simulator using the [s2i CLI](https://github.com/openshift/source-to-image):
 
 ```
-s2i build --copy .  centos/python-36-centos7 ibmcase/orderproducer
+s2i build --copy .  centos/python-36-centos7 ibmcase/reefersimulator
 ```
 
-To run locally
+Then to run it locally use:
 
 ```
 docker run -p 8080:8080 ibmcase/orderproducer
